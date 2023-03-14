@@ -76,11 +76,13 @@ export async function installBunAsProcess() {
   statusBar.dispose();
 
   console.log(`Cleaning up the install.sh`);
-  cleanInstallScript(fileDestinationUri);
+  await cleanInstallScript(fileDestinationUri);
 
   // Display a message info
   let bunVersion = getBunVersion();
   window.showInformationMessage(`Successfully install Bun (v${bunVersion})`);
+
+  return fileDestinationUri;
 }
 
 /**
@@ -173,5 +175,27 @@ export function spawnInstallProcess(
 }
 
 export function cleanInstallScript(installFileDestination: vscode.Uri) {
-  workspace.fs.delete(installFileDestination);
+  return workspace.fs.delete(installFileDestination);
+}
+
+/**
+ * Remove a directory for bun.
+ *
+ * @returns a thenable of workspace.fs.delete
+ */
+export function uninstallBun() {
+  let bunDir = getBunDirectory();
+  if (bunDir === undefined) {
+    return window.showInformationMessage("Bun was not installed");
+  }
+  let bunDirUri = vscode.Uri.file(bunDir);
+  return workspace.fs.delete(bunDirUri, { recursive: true });
+}
+
+/**
+ * Get a directory for a bun.
+ * @returns a bun directory if exists, undefined if bun is not installed
+ */
+export function getBunDirectory(): string | undefined {
+  return process.env.BUN_INSTALL;
 }
