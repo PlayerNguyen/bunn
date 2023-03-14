@@ -54,15 +54,16 @@ export async function installBunAsProcess() {
     path.join(homedir(), "install.sh")
   );
   console.log(`Trying to write a file into ${fileDestinationUri.path}`);
-
-  // Start downloading the install script
-  await downloadInstallScript(fileDestinationUri);
-
   // Create a status bar for progress
   const statusBar = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right
   );
+  
   statusBar.show();
+  statusBar.tooltip;
+  statusBar.text = "$(loading~spin) Loading script";
+  // Start downloading the install script
+  await downloadInstallScript(fileDestinationUri);
 
   // Then start downloading bun
   await spawnInstallProcess(fileDestinationUri, {
