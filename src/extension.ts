@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import { platform } from "os";
 import { suggestInstallBun, warningWindowsPlatform } from "./platform";
 import { getBunVersion, hasBun } from "./system";
+import scriptSelection from "./scriptSelection";
 
 export function activate(context: vscode.ExtensionContext) {
   console.log(`Detecting platform ...`);
@@ -126,21 +127,8 @@ export function activate(context: vscode.ExtensionContext) {
         return;
       }
 
-      if (currentWorkspaceFolders.length === 1) {
-        // Extract package scripts
-        vscode.workspace.fs
-          .readFile(
-            vscode.Uri.joinPath(currentWorkspaceFolders[0].uri, "package.json")
-          )
-          .then((value) => {
-            const parsedPackage = JSON.parse(value.toString());
-            // Not found scripts
-            const scriptParsedPackage = parsedPackage["scripts"];
-
-            if (scriptParsedPackage === undefined) {
-            }
-          });
-      }
+      // Display a script selection
+      scriptSelection(currentWorkspaceFolders);
     })
   );
 }
