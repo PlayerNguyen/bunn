@@ -1,13 +1,14 @@
 import * as vscode from "vscode";
 
-import { platform } from "os";
 import { suggestInstallBun, warningWindowsPlatform } from "./platform";
-import { getBunVersion, hasBun } from "./system";
+import { getBunVersion, hasBun } from "./bunHook";
 import scriptSelection from "./scriptSelection";
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log(`Detecting platform ...`);
-  console.log(`Found ${platform()}`);
+  // Bun debug
+  console.log(
+    `bun install env: ${process.env.BUN_INSTALL}, has bun: ${hasBun()}`
+  );
 
   // If the operating system is windows 32
   warningWindowsPlatform();

@@ -120,14 +120,17 @@ function openQuickPickScriptFromWorkspace(workspaceFolder: WorkspaceFolder) {
       scripts
     ).then((v) => {
       if (v === undefined) {
-        throw new Error("selected value is undefined");
-      } else {
-        console.log(`Executing 'bun run ${v.label}'`);
-        spawnScriptOnTerminal(`Run "${v.label}"`, [
-          // scripts.get(v.label) as string,
-          `bun run ${v.label}`,
-        ]);
+        // Cancel the selection
+        console.log(`Cancel script select`);
+
+        return;
       }
+
+      console.log(`Executing 'bun run ${v.label}'`);
+      spawnScriptOnTerminal(`Run "${v.label}"`, [
+        // scripts.get(v.label) as string,
+        `bun run ${v.label}`,
+      ]);
     });
   });
 }

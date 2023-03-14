@@ -2,7 +2,7 @@ import { spawnSync } from "child_process";
 import * as open from "open";
 import { platform } from "os";
 import * as vscode from "vscode";
-import { installBun } from "./system";
+import { installBunAsProcess } from "./bunHook";
 
 /**
  * Warning if the platform is win32 (Windows) since the
@@ -30,10 +30,9 @@ export function suggestInstallBun() {
       `Bun is not found on your device, click to install or using Bun: Install bun from Command Palette`,
       `Install`
     )
-    .then((value) => {
+    .then(async (value) => {
       if (value === "Install") {
-        // Install using this
-        installBun();
+        await installBunAsProcess();
       }
     });
 }
