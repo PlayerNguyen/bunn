@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync } from "fs";
+import { existsSync } from "fs";
 import { spawn, spawnSync } from "child_process";
 import * as https from "https";
 import { window, workspace } from "vscode";
@@ -58,7 +58,7 @@ export async function installBunAsProcess() {
   const statusBar = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right
   );
-  
+
   statusBar.show();
   statusBar.tooltip;
   statusBar.text = "$(loading~spin) Loading script";
@@ -93,7 +93,7 @@ export async function installBunAsProcess() {
  */
 export function getBunVersion() {
   let bunProcess = spawnSync("bun", ["--version"]);
-  if (bunProcess.output === undefined) {
+  if (bunProcess.output === undefined || bunProcess.error !== undefined) {
     throw new Error("Bun is not installed");
   }
   return bunProcess.output[1]?.toString();
