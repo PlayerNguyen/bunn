@@ -3,7 +3,23 @@
   "displayName": "Bunn",
   "description": "Extension that support Bunjs development",
   "license": "MIT",
-  "version": "0.0.1",
+  "version": "0.0.1`",
+  "icon": ".assets/bunn-icon.png",
+  "bugs": {
+    "url": "https://github.com/PlayerNguyen/vscode-bunn/issues"
+  },
+  "repository": {
+    "url": "https://github.com/PlayerNguyen/vscode-bunn",
+    "type": "git"
+  },
+  "keywords": [
+    "bun",
+    "bun.sh",
+    "bunjs",
+    "js",
+    "javascript"
+  ],
+  "publisher": "PlayerNguyen",
   "engines": {
     "vscode": "^1.76.0"
   },
@@ -41,7 +57,7 @@
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "yarn run compile-tests && yarn run compile && yarn run lint",
     "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "test": "node -r dotenv/config ./out/test/runTest.js"
   },
   "devDependencies": {
     "@types/chai": "^4.3.4",
