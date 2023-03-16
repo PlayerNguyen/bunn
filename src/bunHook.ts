@@ -6,6 +6,7 @@ import * as vscode from "vscode";
 import path = require("path");
 import { IncomingMessage } from "http";
 import { homedir } from "os";
+import { exists } from "./fileExists";
 
 /**
  * Check whether or not the bun is existing on the platform by
@@ -13,7 +14,7 @@ import { homedir } from "os";
  * determine the process.env.BUN_INSTALL directory.
  *
  * @returns true if the bun is existing, false otherwise
- *
+ *  @deprecated use didBunInstall to test if the bun was installed or not
  */
 export function hasBun(): boolean {
   if (process.env.BUN_INSTALL && existsSync(process.env.BUN_INSTALL)) {
@@ -22,6 +23,23 @@ export function hasBun(): boolean {
 
   let bunProcess = spawnSync("bun");
   return bunProcess.output !== null && bunProcess.output.length !== 0;
+}
+/**
+ * Reveal if the bun was installed or not.
+ *
+ * @returns true if the bun directory exists, false if the
+ *  BUN_INSTALL environment variable is indeterminate or
+ *  the bun directory is exists.
+ */
+export async function didBunInstalled(): Promise<boolean> {
+  if (!process.env.BUN_INSTALL) {
+    return false;
+  }
+
+  let bunDirectory = process.env.BUN_INSTALL;
+  let bunDirectoryUri = vscode.Uri.file(bunDirectory);
+
+  return await exists(bunDirectoryUri);
 }
 
 /**
@@ -96,7 +114,11 @@ export function getBunVersion() {
   if (bunProcess.output === undefined || bunProcess.error !== undefined) {
     throw new Error("Bun is not installed");
   }
-  return bunProcess.output[1]?.toString();
+  let versionLine = bunProcess.output[1];
+  if (versionLine === undefined || versionLine === null) {
+    throw new Error("Error with bun output");
+  }
+  return versionLine.toString();
 }
 
 export function downloadInstallScript(destination: vscode.Uri): Promise<void> {
