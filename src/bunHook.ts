@@ -142,8 +142,10 @@ export function getBunVersion(): Promise<string | undefined> {
     }
 
     // Spawn bun version to test
-    const bunExecutableFilePath = path.join(bunDirectory, "bin", "bun");
-    const bunVersionProcess = spawn(bunExecutableFilePath, ["--version"]);
+    const bunExecutableDirBin = path.join(bunDirectory, "bin");
+    const bunVersionProcess = spawn("./bun", ["--version"], {
+      cwd: bunExecutableDirBin,
+    });
 
     let collector: string = "";
     bunVersionProcess.stdout.on(
