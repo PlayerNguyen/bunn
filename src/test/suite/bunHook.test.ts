@@ -6,13 +6,9 @@ import { expect } from "chai";
 // as well as import your extension to test it
 import {
   didBunInstalled,
-  getBunDirectory,
   getBunVersion,
-  hasBun,
   installBunAsProcess,
-  uninstallBun,
 } from "../../bunHook";
-import { exists } from "../../fileExists";
 
 const downloadTimeout = process.env.DOWNLOAD_TEST_TIMEOUT || 20000;
 
