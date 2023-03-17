@@ -1,19 +1,12 @@
 import * as vscode from "vscode";
 
 import { suggestInstallBun, warningWindowsPlatform } from "./platform";
-import {
-  didBunInstalled,
-  getBunVersion,
-  hasBun,
-  installBunAsProcess,
-} from "./bunHook";
+import { didBunInstalled, getBunVersion, installBunAsProcess } from "./bunHook";
 import scriptSelection from "./scriptSelection";
 
 export function activate(context: vscode.ExtensionContext) {
   // Bun debug
-  console.log(
-    `bun install env: ${process.env.BUN_INSTALL}, has bun: ${hasBun()}`
-  );
+  console.log(`bun install env: ${process.env.BUN_INSTALL}`);
 
   // If the operating system is windows 32
   warningWindowsPlatform();
@@ -121,9 +114,9 @@ export function activate(context: vscode.ExtensionContext) {
    * Scans for package.json in project workspace and show selection scripts that can runnable
    */
   context.subscriptions.push(
-    vscode.commands.registerCommand("bunn.runProject", () => {
+    vscode.commands.registerCommand("bunn.runProject", async () => {
       // If the bun is not found
-      if (!hasBun()) {
+      if (!(await didBunInstalled())) {
         suggestInstallBun();
         return;
       }
