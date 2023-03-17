@@ -118,7 +118,7 @@ export function getBunVersion() {
   if (versionLine === undefined || versionLine === null) {
     throw new Error("Error with bun output");
   }
-  return versionLine.toString();
+  return versionLine.toString().trim();
 }
 
 export function downloadInstallScript(destination: vscode.Uri): Promise<void> {
