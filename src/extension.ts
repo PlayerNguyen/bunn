@@ -1,14 +1,12 @@
 import * as vscode from "vscode";
 
 import { suggestInstallBun, warningWindowsPlatform } from "./platform";
-import { getBunVersion, hasBun } from "./bunHook";
+import { didBunInstalled, getBunVersion, installBunAsProcess } from "./bunHook";
 import scriptSelection from "./scriptSelection";
 
 export function activate(context: vscode.ExtensionContext) {
   // Bun debug
-  console.log(
-    `bun install env: ${process.env.BUN_INSTALL}, has bun: ${hasBun()}`
-  );
+  console.log(`bun install env: ${process.env.BUN_INSTALL}`);
 
   // If the operating system is windows 32
   warningWindowsPlatform();
@@ -18,11 +16,11 @@ export function activate(context: vscode.ExtensionContext) {
    * Uses to run the focusing file
    */
   context.subscriptions.push(
-    vscode.commands.registerCommand("bunn.runFocusFile", () => {
+    vscode.commands.registerCommand("bunn.runFocusFile", async () => {
       console.log(`Starting to run the bun...`);
 
       // If the bun is not found
-      if (!hasBun()) {
+      if (!(await didBunInstalled())) {
         suggestInstallBun();
         return;
       }
@@ -68,11 +66,11 @@ export function activate(context: vscode.ExtensionContext) {
    * Uses to upgrade a new version of bun
    */
   context.subscriptions.push(
-    vscode.commands.registerCommand("bunn.upgrade", () => {
+    vscode.commands.registerCommand("bunn.upgrade", async () => {
       console.log("Running `bun upgrade`...");
 
       // If the bun is not found
-      if (!hasBun()) {
+      if (!(await didBunInstalled())) {
         suggestInstallBun();
         return;
       }
@@ -94,27 +92,31 @@ export function activate(context: vscode.ExtensionContext) {
    * Uses to get a version of bun that currently installed
    */
   context.subscriptions.push(
-    vscode.commands.registerCommand("bunn.version", () => {
+    vscode.commands.registerCommand("bunn.version", async () => {
       console.log("Running `bun version`...");
 
       // If the bun is not found
-      if (!hasBun()) {
+      if (!(await didBunInstalled())) {
         suggestInstallBun();
         return;
       }
 
       // Get bun version
-      const bunVersion = getBunVersion();
+      const bunVersion = await getBunVersion();
       vscode.window.showInformationMessage(
         `The current bun version is ${bunVersion}`
       );
     })
   );
 
+  /**
+   * bunn.runProject
+   * Scans for package.json in project workspace and show selection scripts that can runnable
+   */
   context.subscriptions.push(
-    vscode.commands.registerCommand("bunn.runProject", () => {
+    vscode.commands.registerCommand("bunn.runProject", async () => {
       // If the bun is not found
-      if (!hasBun()) {
+      if (!(await didBunInstalled())) {
         suggestInstallBun();
         return;
       }
@@ -130,6 +132,26 @@ export function activate(context: vscode.ExtensionContext) {
 
       // Display a script selection
       scriptSelection(currentWorkspaceFolders);
+    })
+  );
+
+  /**
+   * bunn.installBun
+   * Installs bun if the platform has no bun installed
+   */
+  context.subscriptions.push(
+    vscode.commands.registerCommand("bunn.installBun", async () => {
+      // If the bun was install before
+      if (await didBunInstalled()) {
+        // Get version
+        const bunVersion = await getBunVersion();
+        return vscode.window.showInformationMessage(
+          `Bun was already installed (version ${bunVersion})`
+        );
+      }
+
+      // Otherwise, run install bun as process
+      await installBunAsProcess();
     })
   );
 }
