@@ -1,7 +1,12 @@
 import * as vscode from "vscode";
 
 import { suggestInstallBun, warningWindowsPlatform } from "./platform";
-import { didBunInstalled, getBunVersion, hasBun } from "./bunHook";
+import {
+  didBunInstalled,
+  getBunVersion,
+  hasBun,
+  installBunAsProcess,
+} from "./bunHook";
 import scriptSelection from "./scriptSelection";
 
 export function activate(context: vscode.ExtensionContext) {
@@ -111,6 +116,10 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
+  /**
+   * bunn.runProject
+   * Scans for package.json in project workspace and show selection scripts that can runnable
+   */
   context.subscriptions.push(
     vscode.commands.registerCommand("bunn.runProject", () => {
       // If the bun is not found
@@ -130,6 +139,26 @@ export function activate(context: vscode.ExtensionContext) {
 
       // Display a script selection
       scriptSelection(currentWorkspaceFolders);
+    })
+  );
+
+  /**
+   * bunn.installBun
+   * Installs bun if the platform has no bun installed
+   */
+  context.subscriptions.push(
+    vscode.commands.registerCommand("bunn.installBun", async () => {
+      // If the bun was install before
+      if (await didBunInstalled()) {
+        // Get version
+        const bunVersion = getBunVersion();
+        return vscode.window.showInformationMessage(
+          `Bun was already installed (version ${bunVersion})`
+        );
+      }
+
+      // Otherwise, run install bun as process
+      await installBunAsProcess();
     })
   );
 }

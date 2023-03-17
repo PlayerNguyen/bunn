@@ -3,7 +3,7 @@
   "displayName": "Bunn",
   "description": "Extension that support Bunjs development",
   "license": "MIT",
-  "version": "0.0.1`",
+  "version": "0.0.1",
   "icon": ".assets/bunn-icon.png",
   "bugs": {
     "url": "https://github.com/PlayerNguyen/vscode-bunn/issues"
@@ -45,6 +45,10 @@
       {
         "command": "bunn.runProject",
         "title": "Bun: Run project"
+      },
+      {
+        "command": "bunn.installBun",
+        "title": "Bun: Install bun (if not exists)"
       }
     ]
   },
