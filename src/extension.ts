@@ -166,6 +166,25 @@ export function activate(context: vscode.ExtensionContext) {
       await installBunAsProcess();
     })
   );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("bunn.installDependencies", async () => {
+      if (!(await didBunInstalled())) {
+        return suggestInstallBun();
+      }
+
+      const terminal = vscode.window.createTerminal({
+        name: "Bun: Install dependencies",
+      });
+
+      // Add to disposable
+      context.subscriptions.push(terminal);
+
+      // Run bun install
+      terminal.sendText("bun install", true);
+      terminal.show();
+    })
+  );
 }
 
 // This method is called when your extension is deactivated
