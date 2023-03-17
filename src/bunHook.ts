@@ -56,10 +56,10 @@ export function installBun(): void {
   terminal.sendText("exit");
   terminal.show();
 
-  window.onDidCloseTerminal((_terminal) => {
+  window.onDidCloseTerminal(async (_terminal) => {
     // Successfully install bun
     if (terminal === _terminal && _terminal.exitStatus?.code === 0) {
-      const version = getBunVersion();
+      const version = await getBunVersion();
       window.showInformationMessage(
         `Successfully install bun with version ${version}`
       );
@@ -98,7 +98,7 @@ export async function installBunAsProcess() {
   await cleanInstallScript(fileDestinationUri);
 
   // Display a message info
-  let bunVersion = getBunVersion();
+  let bunVersion = await getBunVersion();
   window.showInformationMessage(`Successfully install Bun (v${bunVersion})`);
 
   return fileDestinationUri;
