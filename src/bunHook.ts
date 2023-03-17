@@ -147,6 +147,10 @@ export function getBunVersion(): Promise<string | undefined> {
       cwd: bunExecutableDirBin,
     });
 
+    bunVersionProcess.on("error", () => {
+      e(new Error("Failed to start sub-process " + bunExecutableDirBin));
+    });
+
     let collector: string = "";
     bunVersionProcess.stdout.on(
       "data",
