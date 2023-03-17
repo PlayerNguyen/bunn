@@ -1,4 +1,4 @@
-![alt](./bunn-icon.png)
+![alt](.assets/bunn-icon.png)
 
 # vscode-bunn
 
@@ -10,8 +10,11 @@ _vscode-bunn is currently on experimental and will be released soon. [Roadmap](h
 - Support fully commands
 
 # Features
- ### Install bun directly in editor
- ![Instant download](./.assets/instant-download.gif)
+
+### Install bun directly in editor
+
+![Instant download](./.assets/instant-download.gif)
+
 # License
 
 Under MIT license, by PlayerNguyen and contributors.
