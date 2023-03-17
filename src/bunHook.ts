@@ -56,10 +56,10 @@ export function installBun(): void {
   terminal.sendText("exit");
   terminal.show();
 
-  window.onDidCloseTerminal((_terminal) => {
+  window.onDidCloseTerminal(async (_terminal) => {
     // Successfully install bun
     if (terminal === _terminal && _terminal.exitStatus?.code === 0) {
-      const version = getBunVersion();
+      const version = await getBunVersion();
       window.showInformationMessage(
         `Successfully install bun with version ${version}`
       );
@@ -98,7 +98,7 @@ export async function installBunAsProcess() {
   await cleanInstallScript(fileDestinationUri);
 
   // Display a message info
-  let bunVersion = getBunVersion();
+  let bunVersion = await getBunVersion();
   window.showInformationMessage(`Successfully install Bun (v${bunVersion})`);
 
   return fileDestinationUri;
@@ -109,7 +109,7 @@ export async function installBunAsProcess() {
  * @returns a bun version as semver format
  * @throws when bun is not installed
  */
-export function getBunVersion() {
+export function getBunVersionSync() {
   let bunProcess = spawnSync("bun", ["--version"]);
   if (bunProcess.output === undefined || bunProcess.error !== undefined) {
     throw new Error("Bun is not installed");
@@ -119,6 +119,48 @@ export function getBunVersion() {
     throw new Error("Error with bun output");
   }
   return versionLine.toString().trim();
+}
+
+/**
+ * Spawn a process to get bun version via `bun --version`.
+ *
+ *
+ * @returns a promise that resolve when bun version found,
+ *  or undefined if bun is not installed
+ */
+export function getBunVersion(): Promise<string | undefined> {
+  return new Promise<string | undefined>(async (r, e) => {
+    // If the bun was not installed
+    if (!(await didBunInstalled())) {
+      return undefined;
+    }
+
+    // Get bun directory
+    const bunDirectory = await getBunDirectory();
+    if (!bunDirectory) {
+      return e(new Error("Bun directory not found"));
+    }
+
+    // Spawn bun version to test
+    const bunExecutableFilePath = path.join(bunDirectory, "bin", "bun");
+    const bunVersionProcess = spawn(bunExecutableFilePath, ["--version"]);
+
+    let collector: string = "";
+    bunVersionProcess.stdout.on(
+      "data",
+      (chunk: Buffer) => (collector += chunk)
+    );
+    bunVersionProcess.on("exit", (exitStatus: number) => {
+      if (exitStatus !== 0) {
+        return e(
+          new Error("Process to get version exit with status " + exitStatus)
+        );
+      }
+
+      let version = collector;
+      r(version.trim());
+    });
+  });
 }
 
 export function downloadInstallScript(destination: vscode.Uri): Promise<void> {

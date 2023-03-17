@@ -1,4 +1,3 @@
-import { spawnSync } from "child_process";
 import * as open from "open";
 import { platform } from "os";
 import * as vscode from "vscode";

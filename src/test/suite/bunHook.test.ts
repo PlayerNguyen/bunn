@@ -7,6 +7,7 @@ import { expect } from "chai";
 import {
   didBunInstalled,
   getBunVersion,
+  getBunVersionSync,
   installBunAsProcess,
 } from "../../bunHook";
 
@@ -62,6 +63,20 @@ suite("[unit] bunHook - bun is installed", () => {
   mocha.describe("didBunInstall", () => {
     test("should return true when bun installed", async () => {
       expect(await didBunInstalled()).to.be.true;
+    });
+  });
+
+  mocha.describe("getBunVersionSync ", () => {
+    test("should return bun version", () => {
+      expect(getBunVersionSync()).to.be.a.string;
+    });
+  });
+
+  mocha.describe("getBunVersion (async)", () => {
+    test("should return bun version", async () => {
+      expect(await getBunVersion()).to.be.a.string;
+
+      return Promise.resolve();
     });
   });
 });

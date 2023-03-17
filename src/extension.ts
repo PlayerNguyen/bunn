@@ -102,7 +102,7 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       // Get bun version
-      const bunVersion = getBunVersion();
+      const bunVersion = await getBunVersion();
       vscode.window.showInformationMessage(
         `The current bun version is ${bunVersion}`
       );
@@ -144,7 +144,7 @@ export function activate(context: vscode.ExtensionContext) {
       // If the bun was install before
       if (await didBunInstalled()) {
         // Get version
-        const bunVersion = getBunVersion();
+        const bunVersion = await getBunVersion();
         return vscode.window.showInformationMessage(
           `Bun was already installed (version ${bunVersion})`
         );
