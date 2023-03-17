@@ -142,8 +142,14 @@ export function getBunVersion(): Promise<string | undefined> {
     }
 
     // Spawn bun version to test
-    const bunExecutableFilePath = path.join(bunDirectory, "bin", "bun");
-    const bunVersionProcess = spawn(bunExecutableFilePath, ["--version"]);
+    const bunExecutableDirBin = path.join(bunDirectory, "bin");
+    const bunVersionProcess = spawn("./bun", ["--version"], {
+      cwd: bunExecutableDirBin,
+    });
+
+    bunVersionProcess.on("error", () => {
+      e(new Error("Failed to start sub-process " + bunExecutableDirBin));
+    });
 
     let collector: string = "";
     bunVersionProcess.stdout.on(

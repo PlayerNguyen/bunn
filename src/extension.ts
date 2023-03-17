@@ -102,10 +102,16 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       // Get bun version
-      const bunVersion = await getBunVersion();
-      vscode.window.showInformationMessage(
-        `The current bun version is ${bunVersion}`
-      );
+      try {
+        const bunVersion = await getBunVersion();
+        vscode.window.showInformationMessage(
+          `The current bun version is ${bunVersion}`
+        );
+      } catch (err: any) {
+        return vscode.window.showErrorMessage(
+          `Error to get bun version ${err.message}`
+        );
+      }
     })
   );
 
@@ -144,10 +150,16 @@ export function activate(context: vscode.ExtensionContext) {
       // If the bun was install before
       if (await didBunInstalled()) {
         // Get version
-        const bunVersion = await getBunVersion();
-        return vscode.window.showInformationMessage(
-          `Bun was already installed (version ${bunVersion})`
-        );
+        try {
+          const bunVersion = await getBunVersion();
+          return vscode.window.showInformationMessage(
+            `Bun was already installed (version ${bunVersion})`
+          );
+        } catch (err: any) {
+          return vscode.window.showErrorMessage(
+            `Error to get bun version ${err.message}`
+          );
+        }
       }
 
       // Otherwise, run install bun as process
