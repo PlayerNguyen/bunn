@@ -24,14 +24,18 @@ export function warningWindowsPlatform() {
 }
 
 export function suggestInstallBun() {
-  vscode.window
-    .showInformationMessage(
-      `Bun is not found on your device, click to install or using Bun: Install bun from Command Palette`,
-      `Install`
-    )
-    .then(async (value) => {
-      if (value === "Install") {
-        await installBunAsProcess();
-      }
-    });
+  return new Promise<void>((resolve, reject) => {
+    vscode.window
+      .showInformationMessage(
+        `Bun is not found on your device, click to install or using Bun: Install bun from Command Palette`,
+        `Install`
+      )
+      .then(async (value) => {
+        if (value === "Install") {
+          await installBunAsProcess()
+            .then(() => resolve())
+            .catch(reject);
+        }
+      });
+  });
 }

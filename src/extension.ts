@@ -167,22 +167,32 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
+  /**
+   * bunn.installDependencies
+   * Install all dependencies
+   */
   context.subscriptions.push(
     vscode.commands.registerCommand("bunn.installDependencies", async () => {
+      const installDependency = () => {
+        const terminal = vscode.window.createTerminal({
+          name: "Bun: Install dependencies",
+        });
+
+        // Add to disposable
+        context.subscriptions.push(terminal);
+
+        // Run bun install
+        terminal.sendText("bun install", true);
+        terminal.show();
+      };
+
       if (!(await didBunInstalled())) {
-        return suggestInstallBun();
+        return suggestInstallBun().then(() => {
+          installDependency();
+        });
       }
 
-      const terminal = vscode.window.createTerminal({
-        name: "Bun: Install dependencies",
-      });
-
-      // Add to disposable
-      context.subscriptions.push(terminal);
-
-      // Run bun install
-      terminal.sendText("bun install", true);
-      terminal.show();
+      installDependency();
     })
   );
 }
