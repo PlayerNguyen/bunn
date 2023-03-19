@@ -17,47 +17,52 @@ export function activate(context: vscode.ExtensionContext) {
    */
   context.subscriptions.push(
     vscode.commands.registerCommand("bunn.runFocusFile", async () => {
-      console.log(`Starting to run the bun...`);
+      const runFocusFile = () => {
+        const currentActiveTextEditor = vscode.window.activeTextEditor;
+
+        // If no file was opened
+        if (!currentActiveTextEditor) {
+          vscode.window
+            .showErrorMessage(
+              "Not open any file to run the bun environment.",
+              "Open"
+            )
+            .then((value) => {
+              //  On click open button
+              if (value === "Open") {
+                vscode.window
+                  .showOpenDialog({
+                    canSelectFiles: true,
+                    canSelectFolders: false,
+                    openLabel: "Open file",
+                  })
+                  .then((uris) => {});
+              }
+            });
+          return;
+        }
+
+        const focusingFileName = currentActiveTextEditor.document.fileName;
+
+        // Execute the bun with current file
+        const terminal = vscode.window.createTerminal({
+          name: "Run bun",
+        });
+
+        terminal.sendText(`bun "${focusingFileName}"`);
+        terminal.show();
+      };
 
       // If the bun is not found
       if (!(await didBunInstalled())) {
-        suggestInstallBun();
-        return;
+        return suggestInstallBun()
+          .then(() => {
+            runFocusFile();
+          })
+          .catch((err) => vscode.window.showErrorMessage(err.message));
       }
 
-      const currentActiveTextEditor = vscode.window.activeTextEditor;
-
-      // If no file was opened
-      if (!currentActiveTextEditor) {
-        vscode.window
-          .showErrorMessage(
-            "Not open any file to run the bun environment.",
-            "Open"
-          )
-          .then((value) => {
-            //  On click open button
-            if (value === "Open") {
-              vscode.window
-                .showOpenDialog({
-                  canSelectFiles: true,
-                  canSelectFolders: false,
-                  openLabel: "Open file",
-                })
-                .then((uris) => {});
-            }
-          });
-        return;
-      }
-
-      const focusingFileName = currentActiveTextEditor.document.fileName;
-
-      // Execute the bun with current file
-      const terminal = vscode.window.createTerminal({
-        name: "Run bun",
-      });
-
-      terminal.sendText(`bun "${focusingFileName}"`);
-      terminal.show();
+      runFocusFile();
     })
   );
 
@@ -95,23 +100,29 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand("bunn.version", async () => {
       console.log("Running `bun version`...");
 
+      const showVersion = async () => {
+        // Get bun version
+        try {
+          const bunVersion = await getBunVersion();
+          vscode.window.showInformationMessage(
+            `The current bun version is ${bunVersion}`
+          );
+          return;
+        } catch (err: any) {
+          return vscode.window.showErrorMessage(
+            `Error to get bun version ${err.message}`
+          );
+        }
+      };
+
       // If the bun is not found
       if (!(await didBunInstalled())) {
-        suggestInstallBun();
-        return;
+        return suggestInstallBun()
+          .then(async () => await showVersion)
+          .catch((err) => vscode.window.showErrorMessage(err.message));
       }
 
-      // Get bun version
-      try {
-        const bunVersion = await getBunVersion();
-        vscode.window.showInformationMessage(
-          `The current bun version is ${bunVersion}`
-        );
-      } catch (err: any) {
-        return vscode.window.showErrorMessage(
-          `Error to get bun version ${err.message}`
-        );
-      }
+      await showVersion();
     })
   );
 
@@ -121,23 +132,30 @@ export function activate(context: vscode.ExtensionContext) {
    */
   context.subscriptions.push(
     vscode.commands.registerCommand("bunn.runProject", async () => {
+      const runTheProject = async () => {
+        // Determine the project package.json
+        const currentWorkspaceFolders = vscode.workspace.workspaceFolders;
+        if (currentWorkspaceFolders === undefined) {
+          // TODO: turn to open workspace (later)
+          vscode.window.showErrorMessage(`No workspace available.`);
+
+          return;
+        }
+
+        // Display a script selection
+        scriptSelection(currentWorkspaceFolders);
+      };
+
       // If the bun is not found
       if (!(await didBunInstalled())) {
-        suggestInstallBun();
-        return;
+        return suggestInstallBun()
+          .then(async () => {
+            await runTheProject();
+          })
+          .catch((err) => vscode.window.showErrorMessage(err.message));
       }
 
-      // Determine the project package.json
-      const currentWorkspaceFolders = vscode.workspace.workspaceFolders;
-      if (currentWorkspaceFolders === undefined) {
-        // TODO: turn to open workspace (later)
-        vscode.window.showErrorMessage(`No workspace available.`);
-
-        return;
-      }
-
-      // Display a script selection
-      scriptSelection(currentWorkspaceFolders);
+      await runTheProject();
     })
   );
 
@@ -164,6 +182,37 @@ export function activate(context: vscode.ExtensionContext) {
 
       // Otherwise, run install bun as process
       await installBunAsProcess();
+    })
+  );
+
+  /**
+   * bunn.installDependencies
+   * Install all dependencies
+   */
+  context.subscriptions.push(
+    vscode.commands.registerCommand("bunn.installDependencies", async () => {
+      const installDependency = async () => {
+        const terminal = vscode.window.createTerminal({
+          name: "Bun: Install dependencies",
+        });
+
+        // Add to disposable
+        context.subscriptions.push(terminal);
+
+        // Run bun install
+        terminal.sendText("bun install", true);
+        terminal.show();
+      };
+
+      if (!(await didBunInstalled())) {
+        return suggestInstallBun()
+          .then(() => {
+            installDependency();
+          })
+          .catch((err) => vscode.window.showErrorMessage(err.message));
+      }
+
+      await installDependency();
     })
   );
 }

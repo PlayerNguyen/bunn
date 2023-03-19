@@ -49,6 +49,10 @@
       {
         "command": "bunn.installBun",
         "title": "Bun: Install bun (if not exists)"
+      },
+      {
+        "command": "bunn.installDependencies",
+        "title": "Bun: Install dependencies"
       }
     ]
   },
